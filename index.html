@@ -1,0 +1,699 @@
+<!--
+  index.html — Clase interactiva LIDE UCEMA
+  Propósito: Página única, offline, para dictar la clase “Toma de Decisiones Basadas en Datos y Estrategia de Datos” (90’).
+
+  Cómo editar placeholders:
+  - Reemplazar <!-- TODO: ... --> por tus recursos reales (imágenes, IDs de YouTube, etc.).
+  - Los textos de cada sección están en <section data-id="S#">. Podés ajustar bullets y notas.
+  - Paleta en :root { --bg, --text, --accent, --muted }. Alterna Dark Mode con el botón o tecla D.
+
+  Atajos de teclado:
+  - N: siguiente sección | P: sección anterior | M: mapa conceptual
+  - S: mostrar/ocultar Notas del facilitador de la sección activa
+  - D: activar/desactivar Dark Mode
+
+  Licencia: MIT
+  Copyright (c) 2025 Felipe Julianes
+  Se permite el uso, copia, modificación y distribución sin restricción.
+-->
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toma de Decisiones Basadas en Datos y Estrategia de Datos — LIDE UCEMA</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0f172a;      /* slate-900 */
+      --text: #e2e8f0;    /* slate-200 */
+      --accent: #22c55e;  /* green-500 */
+      --muted: #94a3b8;   /* slate-400 */
+      --card: #111827;    /* gray-900 */
+      --border: #1f2937;  /* gray-800 */
+    }
+    [data-theme="light"]:root {
+      --bg: #ffffff;
+      --text: #0f172a;
+      --accent: #15803d;
+      --muted: #475569;
+      --card: #f8fafc;
+      --border: #e2e8f0;
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
+      background: var(--bg); color: var(--text); line-height: 1.5;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    header.hero { position: relative; padding: 72px 24px 48px; overflow: hidden; }
+    .hero h1 { font-size: clamp(28px, 5vw, 48px); margin: 0 0 12px; }
+    .hero p.sub { font-size: clamp(16px, 2.4vw, 22px); color: var(--muted); margin: 0 0 24px; }
+    .cta { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: #fff; border: 0; padding: 12px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; }
+    .cta:focus { outline: 3px solid #0000; box-shadow: 0 0 0 3px var(--border), 0 0 0 6px var(--accent); }
+    .hero-visual { position: absolute; inset: 0; pointer-events: none; opacity: .15; }
+    .hero-visual svg { width: 120%; height: 120%; position: absolute; top: -10%; left: -10%; filter: blur(2px); }
+
+    nav.stickybar {
+      position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+      background: color-mix(in oklab, var(--bg) 85%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .bar { display: grid; grid-template-columns: 1fr auto auto auto; gap: 16px; align-items: center; padding: 10px 24px; }
+    .progress { display: flex; align-items: center; gap: 10px; }
+    .progress meter { width: 240px; height: 12px; }
+    .nav-btns { display: flex; gap: 8px; }
+    .btn { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+    .btn:hover { border-color: var(--accent); }
+
+    main { display: grid; gap: 32px; }
+    section.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+    section.card h2 { margin-top: 0; }
+    .obj { color: var(--muted); margin-top: -6px; }
+    .bullets ul { margin: 0; padding-left: 20px; }
+
+    details.notes { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; }
+    details.notes[open] { background: color-mix(in oklab, var(--card) 80%, transparent); border-radius: 10px; padding: 12px; }
+
+    /* Concept map */
+    .concept { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+    .concept svg { width: 100%; height: auto; display: block; }
+    .node { cursor: pointer; transition: transform .2s ease; }
+    .node:hover { transform: scale(1.03); }
+    .node.active circle { fill: var(--accent); }
+
+    /* Layout helpers */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* Timer */
+    .timer { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    .timer .time { font-variant-numeric: tabular-nums; font-weight: 700; }
+
+    /* Survey */
+    .survey .q { margin: 12px 0; }
+    .survey .results { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 10px; }
+    .barrow { display: grid; grid-template-columns: 100px 1fr 60px; gap: 8px; align-items: center; }
+    .barwrap { height: 10px; border: 1px solid var(--border); border-radius: 99px; overflow: clip; }
+    .barfill { height: 100%; background: var(--accent); width: 0%; transition: width .3s ease; }
+
+    /* Mini simulación */
+    .sim label { display: block; font-weight: 600; margin-top: 10px; }
+    .sim output { font-variant-numeric: tabular-nums; margin-left: 6px; }
+    .score { margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; font-weight: 700; }
+
+    /* Ejercicio práctico */
+    .exercise .choices { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tag { border: 1px solid var(--border); padding: 6px 10px; border-radius: 999px; cursor: pointer; }
+    canvas.mini { width: 100%; height: 120px; background: color-mix(in oklab, var(--bg) 90%, transparent); border-radius: 10px; }
+
+    /* Print */
+    @media print {
+      nav.stickybar, .hero-visual, .cta, .concept, .timer .controls, .survey .actions { display: none !important; }
+      body { color: #000; background: #fff; }
+      section.card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero wrap" role="banner">
+    <div class="hero-visual" aria-hidden="true">
+      <!-- SVG de fondo conceptual -->
+      <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="var(--muted)" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke="url(#g1)" stroke-width="2">
+          <path d="M0,300 C200,100 400,500 600,300 S1000,100 1200,300"/>
+          <path d="M0,200 C200,400 400,100 600,300 S1000,500 1200,200"/>
+          <path d="M0,400 C200,300 400,350 600,250 S1000,350 1200,400"/>
+        </g>
+      </svg>
+    </div>
+    <h1>Toma de Decisiones Basadas en Datos y Estrategia de Datos</h1>
+    <p class="sub">Una clase práctica de 90 minutos para líderes: del sesgo a la evidencia, de la intuición a la infraestructura.</p>
+    <button class="cta" id="startBtn" aria-controls="concept-map">Comenzar clase ▸</button>
+  </header>
+
+  <nav class="stickybar" aria-label="Navegación principal">
+    <div class="bar wrap">
+      <div class="progress" aria-live="polite">
+        <strong>Progreso:</strong>
+        <meter id="progressMeter" min="0" max="100" value="0" aria-label="Progreso total"></meter>
+        <span id="progressPct">0%</span>
+      </div>
+      <div>
+        <button class="btn" id="toggleTheme" title="Alternar tema (D)">🌗 Tema</button>
+      </div>
+      <div class="nav-btns" role="group" aria-label="Sección">
+        <button class="btn" id="btnPrev" title="Anterior (P)">◂ Anterior</button>
+        <button class="btn" id="btnMap" title="Mapa (M)">🗺️ Mapa</button>
+        <button class="btn" id="btnNext" title="Siguiente (N)">Siguiente ▸</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="wrap" id="main">
+    <!-- Mapa conceptual clicable -->
+    <section class="concept" id="concept-map" aria-labelledby="mapa-title">
+      <h2 id="mapa-title">Mapa conceptual</h2>
+      <p class="obj">Navegá por los 8 bloques de la clase. El nodo activo se resalta.</p>
+      <svg viewBox="0 0 900 420" role="img" aria-label="Mapa conceptual de la clase">
+        <!-- nodos circulares conectados -->
+        <g stroke="var(--muted)" stroke-width="2" fill="none" opacity="0.5">
+          <path d="M120,70 C220,20 320,20 420,70"/>
+          <path d="M420,70 C520,120 620,120 720,70"/>
+          <path d="M120,210 C220,260 320,260 420,210"/>
+          <path d="M420,210 C520,160 620,160 720,210"/>
+          <path d="M120,350 C220,300 320,300 420,350"/>
+          <path d="M420,350 C520,400 620,400 720,350"/>
+        </g>
+        
+        <!-- helper to draw nodes -->
+        <script type="text/plain" id="mapData">
+          [
+            {"id":"S1","x":120,"y":70,"t":"I"},
+            {"id":"S2","x":420,"y":70,"t":"II"},
+            {"id":"S3","x":720,"y":70,"t":"III"},
+            {"id":"S4","x":120,"y":210,"t":"IV"},
+            {"id":"S5","x":420,"y":210,"t":"V"},
+            {"id":"S6","x":720,"y":210,"t":"VI"},
+            {"id":"S7","x":120,"y":350,"t":"VII"},
+            {"id":"S8","x":420,"y":350,"t":"VIII"}
+          ]
+        </script>
+        <g id="nodes"></g>
+      </svg>
+      <p class="obj">Tip: Atajos <kbd>N</kbd>, <kbd>P</kbd>, <kbd>M</kbd>, <kbd>S</kbd>, <kbd>D</kbd>.</p>
+    </section>
+
+    <!-- Secciones de contenido -->
+    
+    <!-- I. Apertura e Introducción (5 min) -->
+    <section class="card" data-id="S1" aria-labelledby="s1-title">
+      <h2 id="s1-title">I. Apertura e Introducción</h2>
+      <p class="obj"><strong>Objetivo:</strong> Conectar con la audiencia y presentar el marco de la charla. (Tiempo sugerido: 5’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>Saludo y breve presentación personal (experiencia, proyectos relevantes).</li>
+            <li>Pregunta inicial: “¿Cuántas decisiones importantes tomaron en 30 días? ¿Cuántas con datos vs. intuición?”</li>
+            <li>Frase disparadora: <em>“Sin datos, no eres más que otra persona con una opinión”.</em></li>
+          </ul>
+          <div class="timer" data-minutes="5">
+            <span class="time" aria-live="polite">05:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <!-- Placeholder visual -->
+          <svg viewBox="0 0 400 240" aria-label="Visual de apertura">
+            <rect width="400" height="240" rx="16" fill="none" stroke="var(--border)"/>
+            <text x="200" y="120" text-anchor="middle" fill="var(--muted)" font-size="18">TODO: Imagen/Logo/Claim</text>
+          </svg>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Presentate breve. Contá una anécdota que conecte con decisiones y datos.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- II. La toma de decisiones en el mundo actual (15 min) -->
+    <section class="card" data-id="S2" aria-labelledby="s2-title">
+      <h2 id="s2-title">II. La toma de decisiones en el mundo actual</h2>
+      <p class="obj"><strong>Objetivo:</strong> Explicar la relevancia de DDDM y los retos cognitivos. (Tiempo sugerido: 15’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>Definir DDDM y su papel en la hiperdigitalización.</li>
+            <li>Tipos de decisiones: estratégicas, tácticas, operativas.</li>
+            <li>Sesgos: confirmación, anclaje, autoridad, avestruz, frecuencia base.</li>
+            <li>Mitigación: pensamiento crítico, contraste de hipótesis, cuestionar datos.</li>
+          </ul>
+          <div class="timer" data-minutes="15">
+            <span class="time" aria-live="polite">15:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <!-- Encuesta local sobre sesgos -->
+          <div class="survey" aria-labelledby="sv-title">
+            <h3 id="sv-title">Encuesta rápida: ¿Qué sesgo ves con más frecuencia?</h3>
+            <form id="surveyForm">
+              <div class="q"><label><input type="radio" name="bias" value="confirmacion" required> Confirmación</label></div>
+              <div class="q"><label><input type="radio" name="bias" value="anclaje"> Anclaje</label></div>
+              <div class="q"><label><input type="radio" name="bias" value="autoridad"> Autoridad</label></div>
+              <div class="q"><label><input type="radio" name="bias" value="avestruz"> Efecto avestruz</label></div>
+              <div class="q"><label><input type="radio" name="bias" value="frecuencia"> Falacia de la frecuencia base</label></div>
+              <div class="actions" style="margin-top:8px;display:flex;gap:8px;">
+                <button class="btn" type="submit">Votar</button>
+                <button class="btn" type="button" id="clearSurvey">Limpiar</button>
+              </div>
+            </form>
+            <div class="results" id="surveyResults" aria-live="polite">
+              <div class="barrow"><span>Confirmación</span><div class="barwrap"><div class="barfill" data-k="confirmacion"></div></div><span class="pct" data-kp="confirmacion">0%</span></div>
+              <div class="barrow"><span>Anclaje</span><div class="barwrap"><div class="barfill" data-k="anclaje"></div></div><span class="pct" data-kp="anclaje">0%</span></div>
+              <div class="barrow"><span>Autoridad</span><div class="barwrap"><div class="barfill" data-k="autoridad"></div></div><span class="pct" data-kp="autoridad">0%</span></div>
+              <div class="barrow"><span>Avestruz</span><div class="barwrap"><div class="barfill" data-k="avestruz"></div></div><span class="pct" data-kp="avestruz">0%</span></div>
+              <div class="barrow"><span>Frecuencia</span><div class="barwrap"><div class="barfill" data-k="frecuencia"></div></div><span class="pct" data-kp="frecuencia">0%</span></div>
+            </div>
+          </div>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Pedí ejemplos reales del público; conectá cada uno con una táctica de mitigación.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- III. El puente (5 min) -->
+    <section class="card" data-id="S3" aria-labelledby="s3-title">
+      <h2 id="s3-title">III. El puente: de decidir con datos a construir la base</h2>
+      <p class="obj"><strong>Objetivo:</strong> Transición entre lo estratégico y lo técnico. (Tiempo sugerido: 5’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>Metáfora: no construyas un rascacielos sobre arena.</li>
+            <li>Estrategia de datos como pilar de la transformación digital.</li>
+            <li>IA depende de datos de calidad (GIGO).</li>
+          </ul>
+          <div class="timer" data-minutes="5">
+            <span class="time" aria-live="polite">05:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <!-- Placeholder video -->
+          <!-- TODO: Reemplazar VIDEO_ID_YOUTUBE -->
+          <div id="videoBox" aria-live="polite">
+            <div role="img" aria-label="Placeholder de video" style="border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;color:var(--muted)">Video (opcional) — agregar cuando haya conexión</div>
+          </div>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Usá un ejemplo simple de mala calidad de datos y su efecto en una decisión.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- IV. Estrategia de datos e infraestructura (20 min) + mini simulación -->
+    <section class="card" data-id="S4" aria-labelledby="s4-title">
+      <h2 id="s4-title">IV. Estrategia de datos e infraestructura</h2>
+      <p class="obj"><strong>Objetivo:</strong> Mostrar los elementos clave para habilitar decisiones con datos. (Tiempo sugerido: 20’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>Pilares: gobernanza, infraestructura (silos → DW → Data Lake → medallón), análisis, cultura.</li>
+            <li>Preparación de datos: limpieza, imputación, feature engineering.</li>
+            <li>Arquitectura: dependencia de IA sobre calidad y disponibilidad de datos.</li>
+          </ul>
+          <div class="timer" data-minutes="20">
+            <span class="time" aria-live="polite">20:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside class="sim">
+          <h3>Mini simulación: ¿Qué tan confiable es tu decisión?</h3>
+          <label>Calidad de datos <output id="oQuality">70</output>%</label>
+          <input type="range" id="quality" min="0" max="100" value="70"/>
+          <label>Cobertura (completitud) <output id="oCoverage">60</output>%</label>
+          <input type="range" id="coverage" min="0" max="100" value="60"/>
+          <label><input type="checkbox" id="governance" checked> Política de gobernanza aplicada</label>
+          <div class="score" id="scoreBox">Confianza de decisión: <span id="score">0</span>/100</div>
+          <!-- Fórmula (documentada):
+            base = quality*0.6 + coverage*0.4
+            governance boost = +10% multiplicativo si está activo
+            score = clamp( round(base * (governance?1.1:1.0)) , 0, 100 )
+          -->
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Pedí que prueben extremos (poca calidad, mucha cobertura; o al revés) y conversen sobre riesgos.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- V. Herramientas y buenas prácticas (10 min) -->
+    <section class="card" data-id="S5" aria-labelledby="s5-title">
+      <h2 id="s5-title">V. Herramientas y buenas prácticas para DDDM</h2>
+      <p class="obj"><strong>Objetivo:</strong> Presentar recursos prácticos para aplicar el concepto. (Tiempo sugerido: 10’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>Dashboards efectivos (Power BI / Tableau, etc.).</li>
+            <li>Big Data y ML como aceleradores.</li>
+            <li>Buenas prácticas: objetivos claros, limpieza, stakeholders, alfabetización en datos.</li>
+          </ul>
+          <div class="timer" data-minutes="10">
+            <span class="time" aria-live="polite">10:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <!-- Placeholder de galería -->
+          <svg viewBox="0 0 400 240" aria-label="Galería de dashboards">
+            <rect width="400" height="240" rx="16" fill="none" stroke="var(--border)"/>
+            <text x="200" y="120" text-anchor="middle" fill="var(--muted)" font-size="16">TODO: screenshots de dashboards</text>
+          </svg>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Mostrá un ejemplo real propio para conectar con la práctica.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VI. Casos prácticos y ejemplos (20 min) -->
+    <section class="card" data-id="S6" aria-labelledby="s6-title">
+      <h2 id="s6-title">VI. Casos prácticos y ejemplos</h2>
+      <p class="obj"><strong>Objetivo:</strong> Conectar teoría con experiencias reales. (Tiempo sugerido: 20’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>Éxitos: McDonald’s (adaptación local), retail en tiempo real, Interbarge, Coty.</li>
+            <li>Fracasos: Cambridge Analytica, resistencia cultural, mala calidad de datos.</li>
+            <li>Aprendizajes y recomendaciones.</li>
+          </ul>
+          <div class="timer" data-minutes="20">
+            <span class="time" aria-live="polite">20:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <!-- Placeholder de tarjetas de caso -->
+          <div class="grid-2">
+            <div style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+              <strong>McDonald’s</strong><br/><span class="muted">Adaptación local con datos</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+              <strong>Retail en tiempo real</strong><br/><span class="muted">Decisiones ágiles</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+              <strong>Interbarge</strong><br/><span class="muted">Implementación práctica</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+              <strong>Coty</strong><br/><span class="muted">Rediseño de tableros</span>
+            </div>
+          </div>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Elegí 2–3 historias y contalas en detalle; evitá saturar.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VII. Ejercicio práctico guiado (10 min) -->
+    <section class="card" data-id="S7" aria-labelledby="s7-title">
+      <h2 id="s7-title">VII. Ejercicio práctico guiado</h2>
+      <p class="obj"><strong>Objetivo:</strong> Aplicar conceptos y reflexionar. (Tiempo sugerido: 10’)</p>
+      <div class="grid-2 exercise">
+        <div class="bullets">
+          <p>Escenario: Definí una promoción para una cadena. Tenés dos caminos:</p>
+          <div class="choices" role="group" aria-label="Caminos de decisión">
+            <button class="tag" data-choice="intuicion">Intuición</button>
+            <button class="tag" data-choice="datos">Con datos</button>
+          </div>
+          <ul>
+            <li>Comparar outcomes y discutir sesgos vs. requisitos técnicos.</li>
+            <li>Identificar qué datos faltan y cómo conseguirlos.</li>
+          </ul>
+          <div class="timer" data-minutes="10">
+            <span class="time" aria-live="polite">10:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <canvas class="mini" id="exChart" aria-label="Comparación de resultados" role="img"></canvas>
+          <div id="exOutcome" style="margin-top:8px;">
+            Seleccioná un camino para ver el resultado.
+          </div>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Si el grupo elige “intuición”, mostrales el riesgo de sobreestimar el lift. Con “datos”, resaltá supuestos.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VIII. Cierre motivacional y próximos pasos (5 min) -->
+    <section class="card" data-id="S8" aria-labelledby="s8-title">
+      <h2 id="s8-title">VIII. Cierre y próximos pasos</h2>
+      <p class="obj"><strong>Objetivo:</strong> Dejar un mensaje inspirador y práctico. (Tiempo sugerido: 5’)</p>
+      <div class="grid-2">
+        <div class="bullets">
+          <ul>
+            <li>DDDM como viaje continuo.</li>
+            <li>Rol del liderazgo en cultura e infraestructura.</li>
+            <li>Reto: identifiquen una decisión para tomar con datos la próxima semana.</li>
+          </ul>
+          <div class="timer" data-minutes="5">
+            <span class="time" aria-live="polite">05:00</span>
+            <div class="controls">
+              <button class="btn t-start">Iniciar</button>
+              <button class="btn t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <button class="btn" onclick="window.print()">🖨️ Imprimir/Guardar PDF</button>
+          <details class="notes"><summary>Notas del facilitador</summary>
+            Agradecé e invitá a conectar. Dejá contacto.
+          </details>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="wrap" style="margin-bottom:48px;border-top:1px solid var(--border);padding-top:16px;">
+    <small>
+      © 2025 Felipe Julianes — <span class="muted">LIDE UCEMA</span> · <a href="#" onclick="alert('Contacto: felipejulianes@gmail.com');return false;">Contacto</a>
+    </small>
+  </footer>
+
+  <script>
+    // --- Utilidades ---
+    const $ = (q, c=document) => c.querySelector(q);
+    const $$ = (q, c=document) => Array.from(c.querySelectorAll(q));
+    const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
+
+    // Theme persistencia
+    const themeKey = 'lide.theme';
+    function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); localStorage.setItem(themeKey, t); }
+    const savedTheme = localStorage.getItem(themeKey) || 'light';
+    applyTheme(savedTheme);
+    $('#toggleTheme').addEventListener('click', ()=> applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light'));
+
+    // Mapa conceptual dinámico
+    (function conceptMap(){
+      const data = JSON.parse($('#mapData').textContent);
+      const g = $('#nodes');
+      data.forEach(d=>{
+        const node = document.createElementNS('http://www.w3.org/2000/svg','g');
+        node.classList.add('node'); node.setAttribute('data-target', d.id);
+        node.innerHTML = `<circle cx="${d.x}" cy="${d.y}" r="28" fill="none" stroke="var(--muted)" stroke-width="2"></circle>
+                          <text x="${d.x}" y="${d.y+6}" text-anchor="middle" font-weight="700" fill="var(--text)">${d.t}</text>`;
+        node.addEventListener('click', ()=> goTo(d.id));
+        g.appendChild(node);
+      });
+      highlightNode('S1');
+      function highlightNode(id){
+        $$('#nodes .node').forEach(n=> n.classList.toggle('active', n.getAttribute('data-target')===id));
+      }
+      window.highlightNode = highlightNode;
+    })();
+
+    // Navegación entre secciones
+    const sectionIds = ['S1','S2','S3','S4','S5','S6','S7','S8'];
+    let current = sectionIds[0];
+    function goTo(id){
+      current = id; window.highlightNode(id);
+      const el = document.querySelector(`section[data-id="${id}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      updateProgressUI();
+    }
+    $('#btnPrev').addEventListener('click', ()=>{
+      const idx = sectionIds.indexOf(current); if(idx>0) goTo(sectionIds[idx-1]);
+    });
+    $('#btnNext').addEventListener('click', ()=>{
+      const idx = sectionIds.indexOf(current); if(idx<sectionIds.length-1) goTo(sectionIds[idx+1]);
+    });
+    $('#btnMap').addEventListener('click', ()=> $('#concept-map').scrollIntoView({behavior:'smooth'}));
+    $('#startBtn').addEventListener('click', ()=> $('#concept-map').scrollIntoView({behavior:'smooth'}));
+
+    // Atajos de teclado
+    document.addEventListener('keydown', (e)=>{
+      if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+      if(e.key==='n' || e.key==='N') { e.preventDefault(); $('#btnNext').click(); }
+      if(e.key==='p' || e.key==='P') { e.preventDefault(); $('#btnPrev').click(); }
+      if(e.key==='m' || e.key==='M') { e.preventDefault(); $('#btnMap').click(); }
+      if(e.key==='d' || e.key==='D') { e.preventDefault(); $('#toggleTheme').click(); }
+      if(e.key==='s' || e.key==='S') { e.preventDefault();
+        const sec = document.querySelector(`section[data-id="${current}"]`);
+        const det = $('details.notes', sec); if(det) det.open = !det.open;
+      }
+    });
+
+    // Timers por sección (persistencia básica no requerida)
+    $$('.timer').forEach(timer=>{
+      let interval = null;
+      const mins = parseInt(timer.getAttribute('data-minutes'),10) || 5;
+      let remaining = mins*60; // segundos
+      const timeEl = $('.time', timer);
+      function render(){
+        const m = String(Math.floor(remaining/60)).padStart(2,'0');
+        const s = String(remaining%60).padStart(2,'0');
+        timeEl.textContent = `${m}:${s}`;
+      }
+      render();
+      $('.t-start', timer).addEventListener('click', ()=>{
+        if(interval) return; // ya corriendo
+        interval = setInterval(()=>{
+          remaining = Math.max(0, remaining-1); render();
+          if(remaining===0){ clearInterval(interval); interval=null; timeEl.style.color='var(--accent)'; }
+        }, 1000);
+      });
+      $('.t-reset', timer).addEventListener('click', ()=>{
+        clearInterval(interval); interval=null; remaining = mins*60; timeEl.style.color=''; render();
+      });
+    });
+
+    // Encuesta local (sección II) con localStorage
+    const surveyKey = 'lide.survey.v1';
+    const form = $('#surveyForm');
+    const clearBtn = $('#clearSurvey');
+    const resultsBox = $('#surveyResults');
+    const surveyState = JSON.parse(localStorage.getItem(surveyKey) || '{}');
+    function saveSurvey(){ localStorage.setItem(surveyKey, JSON.stringify(surveyState)); }
+    function renderSurvey(){
+      const total = Object.values(surveyState).reduce((a,b)=>a+b,0) || 0;
+      ['confirmacion','anclaje','autoridad','avestruz','frecuencia'].forEach(k=>{
+        const val = surveyState[k]||0; const pct = total? Math.round(val*100/total):0;
+        const fill = resultsBox.querySelector(`.barfill[data-k="${k}"]`);
+        const pctEl = resultsBox.querySelector(`.pct[data-kp="${k}"]`);
+        if(fill) fill.style.width = pct+'%';
+        if(pctEl) pctEl.textContent = pct+'%';
+      });
+    }
+    renderSurvey();
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(form);
+      const k = fd.get('bias');
+      surveyState[k] = (surveyState[k]||0)+1;
+      saveSurvey();
+      renderSurvey();
+      form.reset();
+    });
+    clearBtn.addEventListener('click', ()=>{
+      if(confirm('¿Reiniciar resultados locales de la encuesta?')){
+        localStorage.removeItem(surveyKey);
+        ['confirmacion','anclaje','autoridad','avestruz','frecuencia'].forEach(k=> surveyState[k]=0);
+        renderSurvey();
+      }
+    });
+
+    // Mini simulación (sección IV)
+    const q = $('#quality'), c = $('#coverage'), g = $('#governance');
+    const oq = $('#oQuality'), oc = $('#oCoverage'), sc = $('#score');
+    function computeScore(){
+      const quality = parseInt(q.value,10); const coverage = parseInt(c.value,10);
+      const base = quality*0.6 + coverage*0.4;
+      const boosted = base * (g.checked?1.1:1.0);
+      const score = clamp(Math.round(boosted), 0, 100);
+      sc.textContent = score; oq.textContent = quality; oc.textContent = coverage;
+    }
+    [q,c,g].forEach(el=> el.addEventListener('input', computeScore));
+    computeScore();
+
+    // Ejercicio práctico (sección VII): dos caminos + micrográfico
+    const exChart = $('#exChart');
+    const ctx = exChart.getContext('2d');
+    function drawBars(a,b){
+      const W = exChart.clientWidth || 400; const H = exChart.clientHeight || 120;
+      exChart.width = W * devicePixelRatio; exChart.height = H * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      ctx.clearRect(0,0,W,H);
+      const pad = 24; const bw = (W - pad*3)/2; const max = Math.max(a,b,1);
+      const hA = (H - pad*2) * (a/max);
+      const hB = (H - pad*2) * (b/max);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+      ctx.fillRect(pad, H-pad-hA, bw, hA);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+      ctx.fillRect(pad*2 + bw, H-pad-hB, bw, hB);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text');
+      ctx.font = '12px system-ui';
+      ctx.fillText('Intuición', pad, H-6);
+      ctx.fillText('Con datos', pad*2 + bw, H-6);
+    }
+    function setOutcome(choice){
+      const box = $('#exOutcome');
+      if(choice==='intuicion'){
+        drawBars(55, 70); // intuición (55) vs datos (70) en lift estimado
+        box.textContent = 'Resultado por intuición: riesgo de sobreestimar el lift y suboptimizar ROI. Con datos: mejor ajuste a la elasticidad y segmentación.';
+      } else {
+        drawBars(45, 85); // deliberadamente muestra mayor contraste a favor de datos
+        box.textContent = 'Resultado con datos: test A/B y series temporales estiman un lift del 8–12% en la cadena correcta. Menos riesgo de canibalización.';
+      }
+    }
+    $$('.choices .tag').forEach(btn=> btn.addEventListener('click', ()=> setOutcome(btn.getAttribute('data-choice'))));
+    drawBars(0.1,0.1);
+
+    // Progreso total: basado en secciones marcadas como “vistas” y encuesta respondida
+    const progKey = 'lide.progress.v1';
+    const seen = new Set(JSON.parse(localStorage.getItem(progKey) || '[]'));
+    function markSeen(id){ seen.add(id); localStorage.setItem(progKey, JSON.stringify(Array.from(seen))); updateProgressUI(); }
+    function updateProgressUI(){
+      // criterio simple: sección scrolleada a viewport => marcada
+      const idx = sectionIds.indexOf(current);
+      if(idx>=0) markSeen(sectionIds[idx]);
+      const pct = Math.round((seen.size / sectionIds.length) * 100);
+      $('#progressMeter').value = pct; $('#progressPct').textContent = pct + '%';
+    }
+    // Marcar al entrar a sección por intersección
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ const id=e.target.getAttribute('data-id'); if(id) markSeen(id); }});
+    },{ threshold: 0.6 });
+    sectionIds.forEach(id=>{ const el=document.querySelector(`section[data-id="${id}"]`); if(el) io.observe(el); });
+    updateProgressUI();
+
+    // Accesibilidad: respeta reduced motion
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(prefersReduced){
+      // podría desactivar animaciones si las hubiera
+    }
+
+    // Mejora: resaltar nodo activo on scroll
+    document.addEventListener('scroll', ()=>{
+      let active = current;
+      for(const id of sectionIds){
+        const el = document.querySelector(`section[data-id="${id}"]`);
+        const rect = el.getBoundingClientRect();
+        if(rect.top < window.innerHeight*0.33 && rect.bottom > window.innerHeight*0.33){ active = id; break; }
+      }
+      if(active!==current){ current=active; window.highlightNode(current); }
+    }, { passive: true });
+  </script>
+</body>
+</html>
