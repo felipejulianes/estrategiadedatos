@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clase DDDM — Presentación Interactiva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <style>
+    :root{
+      --bg1:#0a2463; --bg2:#1e3a8a; --bg3:#3e5aa6;
+      --glass: rgba(255,255,255,.08);
+      --glass-2: rgba(255,255,255,.12);
+      --ink:#fff;
+      --accent:#4ade80; --accent-2:#a5b4fc;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Montserrat',sans-serif;background:#0b1020;color:var(--ink)}
+    .deck{height:100vh;display:flex;flex-direction:column}
+    header.toolbar{display:flex;gap:.5rem;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:linear-gradient(135deg,var(--bg1),var(--bg2));position:sticky;top:0;z-index:50}
+    header.toolbar .title{font-weight:800;letter-spacing:.3px}
+    .controls{display:flex;gap:.5rem;align-items:center}
+    .controls button{border:0;background:var(--glass);color:var(--ink);padding:.45rem .7rem;border-radius:10px;cursor:pointer}
+    .controls button:hover{background:var(--glass-2)}
+    .viewport{flex:1;display:grid;place-items:center;background:radial-gradient(2000px 800px at 50% -10%, rgba(255,255,255,.05), transparent 60%)}
+    .slide{width:1280px;height:720px;position:relative;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%);color:#fff;overflow:hidden;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+
+    /* data backdrop */
+    .data-elements{position:absolute;inset:0;opacity:.12}
+    .data-elements::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 30% 40%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 50% 60%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 70% 30%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 90% 70%, rgba(255,255,255,.3) 1px, transparent 1px);background-size:200px 200px}
+    .dline{position:absolute;height:3px;background:rgba(255,255,255,.2);border-radius:2px}
+    .dline.a{width:100px;top:150px;left:200px;transform:rotate(45deg)}
+    .dline.b{width:150px;top:500px;right:250px;transform:rotate(-30deg)}
+    .dline.c{width:120px;bottom:180px;left:300px;transform:rotate(15deg)}
+    .dcircle{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.2)}
+    .dcircle.a{width:80px;height:80px;top:120px;right:180px}
+    .dcircle.b{width:60px;height:60px;bottom:150px;right:300px}
+    .dcircle.c{width:100px;height:100px;bottom:200px;left:150px}
+    .dbar{position:absolute;width:15px;background:rgba(255,255,255,.2);border-radius:4px}
+    .dbar.a{height:80px;top:200px;left:150px}
+    .dbar.b{height:120px;top:180px;left:180px}
+    .dbar.c{height:100px;top:200px;left:210px}
+    .dbar.d{height:60px;bottom:250px;right:200px}
+    .dbar.e{height:90px;bottom:230px;right:230px}
+    .dbar.f{height:110px;bottom:250px;right:260px}
+
+    /* unified slide content */
+    .content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 100px}
+    .title{font-size:60px;font-weight:800;line-height:1.12;margin:0 0 18px}
+    .subtitle{font-size:24px;font-weight:500;opacity:.9;margin:0 0 18px}
+
+    /* Slide 2 agenda styles */
+    .s2{padding:60px;display:flex;flex-direction:column;height:100%}
+    .s2 .header{margin-bottom:32px}
+    .s2 .title{font-size:56px;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .agenda{display:flex;flex-direction:column;gap:14px}
+    .item{display:flex;align-items:center;gap:18px;padding:16px 20px;border-radius:16px;background:var(--glass);backdrop-filter:blur(10px);border-left:5px solid transparent}
+    .item:hover{background:var(--glass-2);border-left-color:var(--accent)}
+    .nro{font-size:28px;font-weight:800;color:var(--accent);width:34px;text-align:center}
+    .itime{margin-left:auto;font-size:16px;font-weight:600;color:var(--accent-2);background:rgba(165,180,252,.15);padding:6px 12px;border-radius:999px;display:flex;align-items:center;gap:8px}
+
+    /* Slide 3 (apertura) bits */
+    .row{width:100%;display:flex;gap:24px;align-items:center}
+    .card{background:var(--glass);border-radius:16px;padding:24px}
+    .avatar{width:160px;height:160px;border-radius:50%;overflow:hidden;border:4px solid var(--accent);flex-shrink:0}
+    .name{font-size:34px;font-weight:800;color:var(--accent);margin:0}
+    .role{font-size:20px;margin:2px 0 0}
+    .qbox{position:relative;background:var(--glass);border-radius:12px;padding:24px;margin-top:24px}
+    .qbox .qi{position:absolute;top:-16px;left:24px;font-size:32px;color:var(--accent);background:var(--bg1);border-radius:50%;padding:6px}
+
+    /* Slide 4 (beneficios) grid */
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%}
+    .bcard{position:relative;background:var(--glass);border-radius:16px;padding:20px;border-left:4px solid transparent}
+    .bcard:hover{transform:translateY(-3px);background:var(--glass-2);border-left-color:var(--accent)}
+    .btitle{font-size:22px;font-weight:700;margin:8px 0}
+    .bdesc{font-size:16px;opacity:.95}
+    .big{position:absolute;right:-10px;bottom:-10px;font-size:110px;opacity:.06}
+
+    /* navigation bullets */
+    .pager{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
+    .dot.active{background:#fff}
+
+    /* presenter helpers */
+    .help{position:absolute;top:12px;right:12px;font-size:12px;opacity:.7}
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+    <header class="toolbar">
+      <div class="title">Toma de Decisiones Basadas en Datos — <span class="text-success">DEMO</span></div>
+      <div class="controls">
+        <button id="prev"><i class="bi bi-arrow-left"></i></button>
+        <button id="next"><i class="bi bi-arrow-right"></i></button>
+        <button id="fs"><i class="bi bi-arrows-fullscreen"></i></button>
+      </div>
+    </header>
+    <main class="viewport">
+
+      <!-- SLIDE 1: Carátula -->
+      <section class="slide" data-slide="1">
+        <div class="data-elements"></div>
+        <div class="dline a"></div><div class="dline b"></div><div class="dline c"></div>
+        <div class="dcircle a"></div><div class="dcircle b"></div><div class="dcircle c"></div>
+        <div class="dbar a"></div><div class="dbar b"></div><div class="dbar c"></div>
+        <div class="dbar d"></div><div class="dbar e"></div><div class="dbar f"></div>
+        <div class="content">
+          <h1 class="title">Toma de Decisiones Basadas en Datos y Estrategia de Datos</h1>
+          <p class="subtitle">Clase de 90 minutos</p>
+          <div class="pager"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="help">Usá ← → o clic en los botones</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Agenda -->
+      <section class="slide" data-slide="2">
+        <div class="data-elements"></div>
+        <div class="content s2" style="text-align:left;align-items:stretch">
+          <div class="header">
+            <h1 class="title">ÍNDICE / AGENDA</h1>
+            <p class="subtitle">Estructura de la clase de 90 minutos</p>
+          </div>
+          <div class="agenda">
+            <div class="item"><div class="nro">I</div><div>Apertura e introducción</div><div class="itime"><i class="bi bi-clock"></i>5 min</div></div>
+            <div class="item"><div class="nro">II</div><div>La toma de decisiones en el mundo actual</div><div class="itime"><i class="bi bi-clock"></i>15 min</div></div>
+            <div class="item"><div class="nro">III</div><div>El puente: de decidir con datos a construir la base</div><div class="itime"><i class="bi bi-clock"></i>5 min</div></div>
+            <div class="item"><div class="nro">IV</div><div>Estrategia de datos e infraestructura</div><div class="itime"><i class="bi bi-clock"></i>20 min</div></div>
+            <div class="item"><div class="nro">V</div><div>Herramientas y buenas prácticas para DDDM</div><div class="itime"><i class="bi bi-clock"></i>10 min</div></div>
+            <div class="item"><div class="nro">VI</div><div>Casos prácticos y ejemplos</div><div class="itime"><i class="bi bi-clock"></i>20 min</div></div>
+            <div class="item"><div class="nro">VII</div><div>Cierre</div><div class="itime"><i class="bi bi-clock"></i>15 min</div></div>
+          </div>
+          <div class="pager"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Apertura -->
+      <section class="slide" data-slide="3">
+        <div class="data-elements"></div>
+        <div class="content" style="padding:40px 80px;align-items:stretch;text-align:left">
+          <h2 class="title" style="font-size:40px"><span style="color:var(--accent);font-weight:800;margin-right:10px">I</span> Apertura e Introducción</h2>
+          <div class="card">
+            <div class="row">
+              <div class="avatar"><img src="https://picsum.photos/seed/felipe-julianes/400/400.jpg" alt="Felipe Julianes" style="width:100%;height:100%;object-fit:cover"></div>
+              <div>
+                <h3 class="name">Felipe Julianes</h3>
+                <p class="role">Especialista en estrategia de datos y cultura data driven</p>
+              </div>
+            </div>
+            <div class="row" style="margin-top:20px">
+              <i class="bi bi-people" style="font-size:32px;color:var(--accent-2)"></i>
+              <p style="font-size:20px;margin:0">La presión de decidir en un entorno de datos masivos y la necesidad de transformar información en acción</p>
+            </div>
+            <div class="qbox">
+              <i class="bi bi-quote qi"></i>
+              <p style="font-size:26px;font-weight:700;font-style:italic;text-align:center;margin:0 0 8px">“Sin datos, no eres más que otra persona con una opinión”</p>
+              <p style="text-align:right;opacity:.8;margin:0">— W. Edwards Deming</p>
+            </div>
+          </div>
+          <div class="pager"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Beneficios -->
+      <section class="slide" data-slide="4">
+        <div class="data-elements"></div>
+        <div class="content" style="padding:40px 60px;align-items:stretch;text-align:left">
+          <h2 class="title" style="font-size:42px;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Beneficios clave de DDDM</h2>
+          <div class="grid">
+            <div class="bcard"><div class="d-flex align-items-center gap-3"><div class="benefit-icon"><i class="bi bi-cash-stack" style="font-size:28px;color:var(--accent)"></i></div><div class="btitle" style="color:var(--accent)">Eficiencia y reducción de costos</div></div><p class="bdesc">Optimización de procesos operativos y asignación de recursos basada en análisis de rendimiento, eliminando desperdicios y mejorando productividad.</p><i class="bi bi-cash-stack big"></i></div>
+            <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-graph-up-arrow" style="font-size:28px;color:#60a5fa"></i><div class="btitle" style="color:#60a5fa">Incremento de ingresos</div></div><p class="bdesc">Identificación de oportunidades de mercado y optimización de estrategias comerciales mediante análisis predictivo y segmentación precisa.</p><i class="bi bi-graph-up-arrow big"></i></div>
+            <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-lightning-charge" style="font-size:28px;color:#fbbf24"></i><div class="btitle" style="color:#fbbf24">Insights en tiempo real</div></div><p class="bdesc">Generación de información valiosa y predicciones para anticipar tendencias, permitiendo respuestas ágiles y decisiones proactivas.</p><i class="bi bi-lightning-charge big"></i></div>
+            <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-shield-check" style="font-size:28px;color:#f87171"></i><div class="btitle" style="color:#f87171">Reducción de incertidumbre</div></div><p class="bdesc">Minimización de sesgos personales y decisiones más objetivas, fundamentadas en evidencia y análisis riguroso.</p><i class="bi bi-shield-check big"></i></div>
+            <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-gear" style="font-size:28px;color:#a78bfa"></i><div class="btitle" style="color:#a78bfa">Optimización estratégica</div></div><p class="bdesc">Ajuste continuo de tácticas basado en resultados medibles, permitiendo iteración rápida y mejora constante.</p><i class="bi bi-gear big"></i></div>
+            <div class="bcard" style="border-left-color:transparent;background:transparent;box-shadow:none"></div>
+          </div>
+          <div class="pager"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Simple deck controller
+    const slides=[...document.querySelectorAll('section.slide')];
+    let idx=0;
+    function show(i){
+      idx=(i+slides.length)%slides.length;
+      slides.forEach((s,j)=>{s.style.display=j===idx?'block':'none'});
+    }
+    function next(){show(idx+1)}
+    function prev(){show(idx-1)}
+    document.getElementById('next').onclick=next;
+    document.getElementById('prev').onclick=prev;
+    document.getElementById('fs').onclick=()=>{const el=document.documentElement; if(!document.fullscreenElement){el.requestFullscreen?.()} else {document.exitFullscreen?.()}}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next(); if(e.key==='ArrowLeft')prev();});
+    // init
+    show(0);
+  </script>
+</body>
+</html>
