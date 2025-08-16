@@ -6,14 +6,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Presentación DDDM</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <style>
-    body { margin: 0; font-family: 'Montserrat', sans-serif; background: #f8f9fa; overflow: hidden; }
-    .slide { width: 1280px; height: 720px; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 40px; box-sizing: border-box; }
-    section { page-break-after: always; }
-    h1,h2,h3 { margin: 0.3em 0; }
-    nav.controls { position: fixed; bottom: 10px; right: 10px; }
-    nav.controls button { margin: 0 2px; padding: 6px 10px; font-size: 14px; }
-    #progress { position: fixed; bottom: 0; left: 0; height: 5px; background: #007bff; width: 0; }
+    :root{
+      --bg1:#0a2463; --bg2:#1e3a8a; --bg3:#3e5aa6;
+      --glass: rgba(255,255,255,.08);
+      --glass-2: rgba(255,255,255,.14);
+      --ink:#fff;
+      --accent:#4ade80; --accent-2:#a5b4fc;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{ margin:0; font-family:'Montserrat',sans-serif; background:#0b1020; color:var(--ink); overflow:hidden }
+
+```
+/* base slide */
+.slide{ width:1280px; height:720px; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:40px; box-sizing:border-box; position:relative; background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%); color:#fff; overflow:hidden; border-radius:18px; box-shadow:0 12px 40px rgba(0,0,0,.35) }
+section.slide{ page-break-after:always }
+h1,h2,h3{ margin:.3em 0 }
+
+/* headers & typography */
+.header{ padding:30px 60px 15px; width:100% }
+.title{ font-size:42px; font-weight:700; margin:0 0 10px; display:flex; align-items:center }
+.title-number{ font-size:48px; font-weight:800; color:var(--accent); margin-right:10px }
+.subtitle{ font-size:22px; font-weight:500; color:var(--accent-2); margin:0 0 10px }
+.content{ width:100%; height:100%; display:flex; flex-direction:column; padding:0 60px 30px; position:relative; z-index:2 }
+
+/* glassy cards shared across slides 12–20 */
+.intro-box,.definition-box,.impact-box,.obstacle-box,
+.aspect-card,.arch-card,.analysis-card,.key-card,.factor-card,.risk-card,.element-card{
+  background:var(--glass); border-radius:15px; padding:20px; transition:.25s transform,.25s background-color
+}
+.element-card:hover,.arch-card:hover,.analysis-card:hover,.key-card:hover,.factor-card:hover,.risk-card:hover{
+  background:var(--glass-2); transform:translateY(-3px)
+}
+
+/* simple grids / layouts needed by slides 12–20 */
+.elements-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:15px }
+.key-aspects{ display:flex; gap:20px }
+.architectures-grid{ display:flex; gap:20px }
+.analysis-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px }
+.keys-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px }
+.factors-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px }
+.risks-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px }
+
+/* timeline minimal */
+.evolution-timeline{ display:flex; justify-content:space-between; gap:14px }
+.stage{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px }
+.stage-number{ width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid var(--accent); color:var(--accent); font-weight:800 }
+
+/* data backdrop */
+.data-elements{ position:absolute; inset:0; opacity:.12; z-index:1 }
+.data-circle{ position:absolute; border-radius:50%; border:2px solid rgba(255,255,255,.3) }
+.circle-1{ width:200px; height:200px; top:-100px; right:-50px }
+.circle-2{ width:150px; height:150px; bottom:-50px; left:-50px }
+.data-dot{ position:absolute; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.4) }
+.dot-1{ top:120px; right:200px } .dot-2{ top:180px; right:150px } .dot-3{ top:240px; right:220px }
+.dot-4{ bottom:150px; left:180px } .dot-5{ bottom:210px; left:230px } .dot-6{ bottom:270px; left:150px }
+
+/* controls / progress */
+nav.controls{ position:fixed; bottom:10px; right:10px; z-index:100 }
+nav.controls button{ margin:0 2px; padding:6px 10px; font-size:14px; background:var(--glass); border:0; color:#fff; border-radius:10px; cursor:pointer }
+nav.controls button:hover{ background:var(--glass-2) }
+#progress{ position:fixed; bottom:0; left:0; height:5px; background:var(--accent); width:0; z-index:100 }
+```
+
   </style>
 </head>
 <body>
@@ -64,7 +121,7 @@
   <div id="progress"></div>
 
 <script>
-  const slides = document.querySelectorAll('.slide');
+  const slides = document.querySelectorAll('section.slide');
   let current = 0;
   function showSlide(i) {
     slides.forEach((s,idx)=>{ s.style.display = idx===i? 'flex':'none'; });
@@ -426,6 +483,31 @@
       </div>
     </div>
   </section>
+
+  <script>
+    // Re-initialize after all slides (incl. the appended 12–20) are parsed
+    (function(){
+      const slidesAll = Array.from(document.querySelectorAll('section.slide'));
+      let idx = 0;
+      function show(i){
+        idx = (i + slidesAll.length) % slidesAll.length;
+        slidesAll.forEach((s,j)=>{ s.style.display = j===idx ? 'flex' : 'none'; });
+        const p = document.getElementById('progress'); if(p){ p.style.width = ((idx+1)/slidesAll.length*100)+'%'; }
+      }
+      const prev = document.getElementById('prev');
+      const next = document.getElementById('next');
+      const pdf  = document.getElementById('pdf');
+      if(prev) prev.onclick = ()=>show(idx-1);
+      if(next) next.onclick = ()=>show(idx+1);
+      if(pdf)  pdf.onclick  = ()=>window.print();
+      document.addEventListener('keydown',e=>{
+        if(e.key==='ArrowRight' || e.key===' ') show(idx+1);
+        if(e.key==='ArrowLeft') show(idx-1);
+        if(e.key.toLowerCase()==='p') window.print();
+      });
+      show(0);
+    })();
+  </script>
 
 </html>
 
