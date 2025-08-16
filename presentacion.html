@@ -2,512 +2,368 @@
 
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Presentación DDDM</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clase DDDM — Presentación Interactiva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
   <style>
     :root{
       --bg1:#0a2463; --bg2:#1e3a8a; --bg3:#3e5aa6;
       --glass: rgba(255,255,255,.08);
-      --glass-2: rgba(255,255,255,.14);
+      --glass-2: rgba(255,255,255,.12);
       --ink:#fff;
       --accent:#4ade80; --accent-2:#a5b4fc;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{ margin:0; font-family:'Montserrat',sans-serif; background:#0b1020; color:var(--ink); overflow:hidden }
+    html,body{height:100%;margin:0;font-family:'Montserrat',sans-serif;background:#0b1020;color:var(--ink)}
+    .deck{height:100vh;display:flex;flex-direction:column}
+    header.toolbar{display:flex;gap:.5rem;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:linear-gradient(135deg,var(--bg1),var(--bg2));position:sticky;top:0;z-index:50}
+    header.toolbar .title{font-weight:800;letter-spacing:.3px}
+    .controls{display:flex;gap:.5rem;align-items:center}
+    .controls button{border:0;background:var(--glass);color:var(--ink);padding:.45rem .7rem;border-radius:10px;cursor:pointer}
+    .controls button:hover{background:var(--glass-2)}
+    .viewport{flex:1;display:grid;place-items:center;background:radial-gradient(2000px 800px at 50% -10%, rgba(255,255,255,.05), transparent 60%)}
+    .slide{width:1280px;height:720px;position:relative;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%);color:#fff;overflow:hidden;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 
 ```
-/* base slide */
-.slide{ width:1280px; height:720px; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:40px; box-sizing:border-box; position:relative; background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%); color:#fff; overflow:hidden; border-radius:18px; box-shadow:0 12px 40px rgba(0,0,0,.35) }
-section.slide{ page-break-after:always }
-h1,h2,h3{ margin:.3em 0 }
-
-/* headers & typography */
-.header{ padding:30px 60px 15px; width:100% }
-.title{ font-size:42px; font-weight:700; margin:0 0 10px; display:flex; align-items:center }
-.title-number{ font-size:48px; font-weight:800; color:var(--accent); margin-right:10px }
-.subtitle{ font-size:22px; font-weight:500; color:var(--accent-2); margin:0 0 10px }
-.content{ width:100%; height:100%; display:flex; flex-direction:column; padding:0 60px 30px; position:relative; z-index:2 }
-
-/* glassy cards shared across slides 12–20 */
-.intro-box,.definition-box,.impact-box,.obstacle-box,
-.aspect-card,.arch-card,.analysis-card,.key-card,.factor-card,.risk-card,.element-card{
-  background:var(--glass); border-radius:15px; padding:20px; transition:.25s transform,.25s background-color
-}
-.element-card:hover,.arch-card:hover,.analysis-card:hover,.key-card:hover,.factor-card:hover,.risk-card:hover{
-  background:var(--glass-2); transform:translateY(-3px)
-}
-
-/* simple grids / layouts needed by slides 12–20 */
-.elements-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:15px }
-.key-aspects{ display:flex; gap:20px }
-.architectures-grid{ display:flex; gap:20px }
-.analysis-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px }
-.keys-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px }
-.factors-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px }
-.risks-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px }
-
-/* timeline minimal */
-.evolution-timeline{ display:flex; justify-content:space-between; gap:14px }
-.stage{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px }
-.stage-number{ width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid var(--accent); color:var(--accent); font-weight:800 }
-
 /* data backdrop */
-.data-elements{ position:absolute; inset:0; opacity:.12; z-index:1 }
-.data-circle{ position:absolute; border-radius:50%; border:2px solid rgba(255,255,255,.3) }
-.circle-1{ width:200px; height:200px; top:-100px; right:-50px }
-.circle-2{ width:150px; height:150px; bottom:-50px; left:-50px }
-.data-dot{ position:absolute; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.4) }
-.dot-1{ top:120px; right:200px } .dot-2{ top:180px; right:150px } .dot-3{ top:240px; right:220px }
-.dot-4{ bottom:150px; left:180px } .dot-5{ bottom:210px; left:230px } .dot-6{ bottom:270px; left:150px }
+.data-elements{position:absolute;inset:0;opacity:.12}
+.data-elements::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 30% 40%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 50% 60%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 70% 30%, rgba(255,255,255,.3) 1px, transparent 1px),radial-gradient(circle at 90% 70%, rgba(255,255,255,.3) 1px, transparent 1px);background-size:200px 200px}
+.dline{position:absolute;height:3px;background:rgba(255,255,255,.2);border-radius:2px}
+.dline.a{width:100px;top:150px;left:200px;transform:rotate(45deg)}
+.dline.b{width:150px;top:500px;right:250px;transform:rotate(-30deg)}
+.dline.c{width:120px;bottom:180px;left:300px;transform:rotate(15deg)}
+.dcircle{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.2)}
+.dcircle.a{width:80px;height:80px;top:120px;right:180px}
+.dcircle.b{width:60px;height:60px;bottom:150px;right:300px}
+.dcircle.c{width:100px;height:100px;bottom:200px;left:150px}
+.dbar{position:absolute;width:15px;background:rgba(255,255,255,.2);border-radius:4px}
+.dbar.a{height:80px;top:200px;left:150px}
+.dbar.b{height:120px;top:180px;left:180px}
+.dbar.c{height:100px;top:200px;left:210px}
+.dbar.d{height:60px;bottom:250px;right:200px}
+.dbar.e{height:90px;bottom:230px;right:230px}
+.dbar.f{height:110px;bottom:250px;right:260px}
 
-/* controls / progress */
-nav.controls{ position:fixed; bottom:10px; right:10px; z-index:100 }
-nav.controls button{ margin:0 2px; padding:6px 10px; font-size:14px; background:var(--glass); border:0; color:#fff; border-radius:10px; cursor:pointer }
-nav.controls button:hover{ background:var(--glass-2) }
-#progress{ position:fixed; bottom:0; left:0; height:5px; background:var(--accent); width:0; z-index:100 }
+/* unified slide content */
+.content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 100px}
+.title{font-size:60px;font-weight:800;line-height:1.12;margin:0 0 18px}
+.subtitle{font-size:24px;font-weight:500;opacity:.9;margin:0 0 18px}
+
+/* Slide 2 agenda styles */
+.s2{padding:60px;display:flex;flex-direction:column;height:100%}
+.s2 .header{margin-bottom:32px}
+.s2 .title{font-size:56px;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.agenda{display:flex;flex-direction:column;gap:14px}
+.item{display:flex;align-items:center;gap:18px;padding:16px 20px;border-radius:16px;background:var(--glass);backdrop-filter:blur(10px);border-left:5px solid transparent}
+.item:hover{background:var(--glass-2);border-left-color:var(--accent)}
+.nro{font-size:28px;font-weight:800;color:var(--accent);width:34px;text-align:center}
+.itime{margin-left:auto;font-size:16px;font-weight:600;color:var(--accent-2);background:rgba(165,180,252,.15);padding:6px 12px;border-radius:999px;display:flex;align-items:center;gap:8px}
+
+/* Slide 3 (apertura) bits */
+.row{width:100%;display:flex;gap:24px;align-items:center}
+.card{background:var(--glass);border-radius:16px;padding:24px}
+.avatar{width:160px;height:160px;border-radius:50%;overflow:hidden;border:4px solid var(--accent);flex-shrink:0}
+.name{font-size:34px;font-weight:800;color:var(--accent);margin:0}
+.role{font-size:20px;margin:2px 0 0}
+.qbox{position:relative;background:var(--glass);border-radius:12px;padding:24px;margin-top:24px}
+.qbox .qi{position:absolute;top:-16px;left:24px;font-size:32px;color:var(--accent);background:var(--bg1);border-radius:50%;padding:6px}
+
+/* Slide 4 (beneficios) grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%}
+.bcard{position:relative;background:var(--glass);border-radius:16px;padding:20px;border-left:4px solid transparent}
+.bcard:hover{transform:translateY(-3px);background:var(--glass-2);border-left-color:var(--accent)}
+.btitle{font-size:22px;font-weight:700;margin:8px 0}
+.bdesc{font-size:16px;opacity:.95}
+.big{position:absolute;right:-10px;bottom:-10px;font-size:110px;opacity:.06}
+
+/* navigation bullets */
+.pager{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
+.dot.active{background:#fff}
+
+/* presenter helpers */
+.help{position:absolute;top:12px;right:12px;font-size:12px;opacity:.7}
+
+/* Utilidades para listas ítem + icono */
+.li{display:flex;align-items:flex-start;gap:10px}
+.li i{margin-top:2px;color:var(--accent-2)}
+
+/* Grids adicionales */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;width:100%}
 ```
 
   </style>
 </head>
 <body>
-
-  <section class="slide" data-title="Slide 1">
-    <h1>Toma de Decisiones Basadas en Datos</h1>
-    <h2>Estrategia de Datos</h2>
-  </section>
-
-  <section class="slide" data-title="Slide 2">
-    <h2>Contenido</h2>
-    <ul>
-      <li>Introducción</li>
-      <li>Toma de Decisiones</li>
-      <li>Estrategia de Datos</li>
-      <li>Infraestructura</li>
-      <li>Herramientas</li>
-    </ul>
-  </section>
-
-  <!-- Slides 3–20 -->
-
-  <section class="slide"><h2>Slide 3</h2></section>
-  <section class="slide"><h2>Slide 4</h2></section>
-  <section class="slide"><h2>Slide 5</h2></section>
-  <section class="slide"><h2>Slide 6</h2></section>
-  <section class="slide"><h2>Slide 7</h2></section>
-  <section class="slide"><h2>Slide 8</h2></section>
-  <section class="slide"><h2>Slide 9</h2></section>
-  <section class="slide"><h2>Slide 10</h2></section>
-  <section class="slide"><h2>Slide 11</h2></section>
-  <section class="slide"><h2>Slide 12</h2></section>
-  <section class="slide"><h2>Slide 13</h2></section>
-  <section class="slide"><h2>Slide 14</h2></section>
-  <section class="slide"><h2>Slide 15</h2></section>
-  <section class="slide"><h2>Slide 16</h2></section>
-  <section class="slide"><h2>Slide 17</h2></section>
-  <section class="slide"><h2>Slide 18</h2></section>
-  <section class="slide"><h2>Slide 19</h2></section>
-  <section class="slide"><h2>Slide 20</h2></section>
-
-  <nav class="controls">
-    <button id="prev">◀</button>
-    <button id="next">▶</button>
-    <button id="overview">O</button>
-    <button id="pdf">PDF</button>
-  </nav>
-  <div id="progress"></div>
-
-<script>
-  const slides = document.querySelectorAll('section.slide');
-  let current = 0;
-  function showSlide(i) {
-    slides.forEach((s,idx)=>{ s.style.display = idx===i? 'flex':'none'; });
-    document.getElementById('progress').style.width = ((i+1)/slides.length*100)+'%';
-  }
-  document.getElementById('prev').onclick = ()=>{ if(current>0){current--; showSlide(current);} };
-  document.getElementById('next').onclick = ()=>{ if(current<slides.length-1){current++; showSlide(current);} };
-  document.getElementById('pdf').onclick = ()=>{ window.print(); };
-  document.onkeydown = (e)=>{
-    if(e.key==='ArrowRight' || e.key===' '){ if(current<slides.length-1){current++; showSlide(current);} }
-    if(e.key==='ArrowLeft'){ if(current>0){current--; showSlide(current);} }
-    if(e.key.toLowerCase()==='p'){ window.print(); }
-  };
-  showSlide(current);
-</script>
-
-</body>
-
-  <!-- Slide 12: Estrategia de datos e infraestructura -->
-
-  <section class="slide slide-12" data-title="IV. Estrategia de datos e infraestructura">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
+  <div class="deck" id="deck">
+    <header class="toolbar">
+      <div class="title">Toma de Decisiones Basadas en Datos — <span class="text-success">DEMO</span></div>
+      <div class="controls">
+        <button id="prev"><i class="bi bi-arrow-left"></i></button>
+        <button id="next"><i class="bi bi-arrow-right"></i></button>
+        <button id="fs"><i class="bi bi-arrows-fullscreen"></i></button>
       </div>
+    </header>
+    <main class="viewport">
+
+```
+  <!-- SLIDE 1: Carátula -->
+  <section class="slide" data-slide="1">
+    <div class="data-elements"></div>
+    <div class="dline a"></div><div class="dline b"></div><div class="dline c"></div>
+    <div class="dcircle a"></div><div class="dcircle b"></div><div class="dcircle c"></div>
+    <div class="dbar a"></div><div class="dbar b"></div><div class="dbar c"></div>
+    <div class="dbar d"></div><div class="dbar e"></div><div class="dbar f"></div>
+    <div class="content">
+      <h1 class="title">Toma de Decisiones Basadas en Datos y Estrategia de Datos</h1>
+      <p class="subtitle">Clase de 90 minutos</p>
+      <div class="pager"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="help">Usá ← → o clic en los botones</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: Agenda -->
+  <section class="slide" data-slide="2">
+    <div class="data-elements"></div>
+    <div class="content s2" style="text-align:left;align-items:stretch">
       <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Estrategia de datos e infraestructura</h1>
+        <h1 class="title">ÍNDICE / AGENDA</h1>
+        <p class="subtitle">Estructura de la clase de 90 minutos</p>
       </div>
-      <div class="content">
-        <div class="intro-box">
-          <p class="intro-text">La toma de decisiones basada en datos requiere una <span class="highlight">estrategia sólida</span> y una <span class="highlight">infraestructura robusta</span>. Este capítulo conecta la visión con la capacidad técnica para ejecutarla.</p>
-          <p class="key-question">¿Cómo construimos la base para decisiones confiables, rápidas y escalables?</p>
-        </div>
-        <div class="diagram-container">
-          <div class="diagram">
-            <div class="diagram-element strategy">
-              <i class="bi bi-diagram-3 element-icon"></i>
-              <h3 class="element-title">Estrategia</h3>
-              <p class="element-text">Marco integral: personas, procesos, tecnología y cultura</p>
-            </div>
-            <div class="diagram-element infrastructure">
-              <i class="bi bi-hdd-stack element-icon"></i>
-              <h3 class="element-title">Infraestructura</h3>
-              <p class="element-text">Capacidades técnicas para capturar, almacenar y procesar datos</p>
-            </div>
-            <div class="diagram-element decision">
-              <i class="bi bi-lightbulb element-icon"></i>
-              <h3 class="element-title">Decisiones</h3>
-              <p class="element-text">Transformación de información en acciones medibles</p>
-            </div>
-            <div class="connector connector-strategy"></div>
-            <div class="arrow-down arrow-strategy"></div>
-            <div class="connector connector-infrastructure"></div>
-            <div class="arrow-down arrow-infrastructure"></div>
+      <div class="agenda">
+        <div class="item"><div class="nro">I</div><div>Apertura e introducción</div><div class="itime"><i class="bi bi-clock"></i>5 min</div></div>
+        <div class="item"><div class="nro">II</div><div>La toma de decisiones en el mundo actual</div><div class="itime"><i class="bi bi-clock"></i>15 min</div></div>
+        <div class="item"><div class="nro">III</div><div>El puente: de decidir con datos a construir la base</div><div class="itime"><i class="bi bi-clock"></i>5 min</div></div>
+        <div class="item"><div class="nro">IV</div><div>Estrategia de datos e infraestructura</div><div class="itime"><i class="bi bi-clock"></i>20 min</div></div>
+        <div class="item"><div class="nro">V</div><div>Herramientas y buenas prácticas para DDDM</div><div class="itime"><i class="bi bi-clock"></i>10 min</div></div>
+        <div class="item"><div class="nro">VI</div><div>Casos prácticos y ejemplos</div><div class="itime"><i class="bi bi-clock"></i>20 min</div></div>
+        <div class="item"><div class="nro">VII</div><div>Cierre</div><div class="itime"><i class="bi bi-clock"></i>15 min</div></div>
+      </div>
+      <div class="pager"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: Apertura -->
+  <section class="slide" data-slide="3">
+    <div class="data-elements"></div>
+    <div class="content" style="padding:40px 80px;align-items:stretch;text-align:left">
+      <h2 class="title" style="font-size:40px"><span style="color:var(--accent);font-weight:800;margin-right:10px">I</span> Apertura e Introducción</h2>
+      <div class="card">
+        <div class="row">
+          <div class="avatar"><img src="https://picsum.photos/seed/felipe-julianes/400/400.jpg" alt="Felipe Julianes" style="width:100%;height:100%;object-fit:cover"></div>
+          <div>
+            <h3 class="name">Felipe Julianes</h3>
+            <p class="role">Especialista en estrategia de datos y cultura data driven</p>
           </div>
         </div>
+        <div class="row" style="margin-top:20px">
+          <i class="bi bi-people" style="font-size:32px;color:var(--accent-2)"></i>
+          <p style="font-size:20px;margin:0">La presión de decidir en un entorno de datos masivos y la necesidad de transformar información en acción</p>
+        </div>
+        <div class="qbox">
+          <i class="bi bi-quote qi"></i>
+          <p style="font-size:26px;font-weight:700;font-style:italic;text-align:center;margin:0 0 8px">“Sin datos, no eres más que otra persona con una opinión”</p>
+          <p style="text-align:right;opacity:.8;margin:0">— W. Edwards Deming</p>
+        </div>
+      </div>
+      <div class="pager"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: Beneficios -->
+  <section class="slide" data-slide="4">
+    <div class="data-elements"></div>
+    <div class="content" style="padding:40px 60px;align-items:stretch;text-align:left">
+      <h2 class="title" style="font-size:42px;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Beneficios clave de DDDM</h2>
+      <div class="grid">
+        <div class="bcard"><div class="d-flex align-items-center gap-3"><div class="benefit-icon"><i class="bi bi-cash-stack" style="font-size:28px;color:var(--accent)"></i></div><div class="btitle" style="color:var(--accent)">Eficiencia y reducción de costos</div></div><p class="bdesc">Optimización de procesos operativos y asignación de recursos basada en análisis de rendimiento, eliminando desperdicios y mejorando productividad.</p><i class="bi bi-cash-stack big"></i></div>
+        <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-graph-up-arrow" style="font-size:28px;color:#60a5fa"></i><div class="btitle" style="color:#60a5fa">Incremento de ingresos</div></div><p class="bdesc">Identificación de oportunidades de mercado y optimización de estrategias comerciales mediante análisis predictivo y segmentación precisa.</p><i class="bi bi-graph-up-arrow big"></i></div>
+        <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-lightning-charge" style="font-size:28px;color:#fbbf24"></i><div class="btitle" style="color:#fbbf24">Insights en tiempo real</div></div><p class="bdesc">Generación de información valiosa y predicciones para anticipar tendencias, permitiendo respuestas ágiles y decisiones proactivas.</p><i class="bi bi-lightning-charge big"></i></div>
+        <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-shield-check" style="font-size:28px;color:#f87171"></i><div class="btitle" style="color:#f87171">Reducción de incertidumbre</div></div><p class="bdesc">Minimización de sesgos personales y decisiones más objetivas, fundamentadas en evidencia y análisis riguroso.</p><i class="bi bi-shield-check big"></i></div>
+        <div class="bcard"><div class="d-flex align-items-center gap-3"><i class="bi bi-gear" style="font-size:28px;color:#a78bfa"></i><div class="btitle" style="color:#a78bfa">Optimización estratégica</div></div><p class="bdesc">Ajuste continuo de tácticas basado en resultados medibles, permitiendo iteración rápida y mejora constante.</p><i class="bi bi-gear big"></i></div>
+        <div class="bcard" style="border-left-color:transparent;background:transparent;box-shadow:none"></div>
+      </div>
+      <div class="pager"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+    </div>
+  </section>
+
+  <!-- SLIDE 12: Estrategia de datos e infraestructura -->
+  <section class="slide" data-slide="12">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Estrategia de datos e infraestructura</h2>
+      <div class="card" style="margin-top:10px">
+        <p style="font-size:20px">La toma de decisiones basada en datos requiere una <span style="color:var(--accent);font-weight:700">estrategia sólida</span> y una <span style="color:var(--accent);font-weight:700">infraestructura robusta</span>. Este capítulo conecta la visión con la capacidad técnica para ejecutarla.</p>
+        <p class="subtitle" style="margin:0">¿Cómo construimos la base para decisiones confiables, rápidas y escalables?</p>
       </div>
     </div>
   </section>
 
-  <!-- Slide 13: Pilares de la estrategia de datos -->
-
-  <section class="slide slide-13" data-title="IV. Pilares de la estrategia de datos">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
-      </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Pilares de la estrategia de datos</h1>
-      </div>
-      <div class="content">
-        <div class="pillars-container">
-          <div class="pillars-diagram">
-            <div class="center-circle"><div class="center-text">Estrategia de Datos</div></div>
-            <div class="connector connector-1"></div>
-            <div class="connector connector-2"></div>
-            <div class="connector connector-3"></div>
-            <div class="connector connector-4"></div>
-            <div class="pillar pillar-1">
-              <div class="pillar-header"><i class="bi bi-shield-check pillar-icon"></i><h3 class="pillar-title">Gobernanza</h3></div>
-              <p class="pillar-text">Políticas y estándares para datos confiables y seguros</p>
-              <div class="key-elements">
-                <div class="element-item"><i class="bi bi-check-circle element-icon"></i><p class="element-text"><span class="element-name">Calidad:</span> Precisión, completitud</p></div>
-                <div class="element-item"><i class="bi bi-lock element-icon"></i><p class="element-text"><span class="element-name">Seguridad:</span> Control de accesos</p></div>
-              </div>
-            </div>
-            <div class="pillar pillar-2">
-              <div class="pillar-header"><i class="bi bi-hdd-network pillar-icon"></i><h3 class="pillar-title">Infraestructura</h3></div>
-              <p class="pillar-text">Capacidades técnicas para gestionar datos</p>
-              <div class="key-elements">
-                <div class="element-item"><i class="bi bi-link-45deg element-icon"></i><p class="element-text"><span class="element-name">Integración:</span> Múltiples fuentes</p></div>
-                <div class="element-item"><i class="bi bi-arrows-expand element-icon"></i><p class="element-text"><span class="element-name">Escalabilidad:</span> Volumen</p></div>
-              </div>
-            </div>
-            <div class="pillar pillar-3">
-              <div class="pillar-header"><i class="bi bi-graph-up pillar-icon"></i><h3 class="pillar-title">Análisis</h3></div>
-              <p class="pillar-text">Transformación de datos en insights</p>
-              <div class="key-elements">
-                <div class="element-item"><i class="bi bi-pie-chart element-icon"></i><p class="element-text"><span class="element-name">BI:</span> Dashboards, reportes</p></div>
-                <div class="element-item"><i class="bi bi-cpu element-icon"></i><p class="element-text"><span class="element-name">Analítica:</span> Modelos ML</p></div>
-              </div>
-            </div>
-            <div class="pillar pillar-4">
-              <div class="pillar-header"><i class="bi bi-people pillar-icon"></i><h3 class="pillar-title">Cultura</h3></div>
-              <p class="pillar-text">Mentalidad basada en datos</p>
-              <div class="key-elements">
-                <div class="element-item"><i class="bi bi-book element-icon"></i><p class="element-text"><span class="element-name">Alfabetización:</span> Formación</p></div>
-                <div class="element-item"><i class="bi bi-award element-icon"></i><p class="element-text"><span class="element-name">Incentivos:</span> Alineados</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- SLIDE 13: Pilares de la estrategia de datos -->
+  <section class="slide" data-slide="13">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Pilares de la estrategia de datos</h2>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="card"><h3 style="color:#60a5fa">Gobernanza</h3><div class="li"><i class="bi bi-check-circle"></i><div>Calidad: precisión y completitud</div></div><div class="li"><i class="bi bi-lock"></i><div>Seguridad: control de accesos</div></div></div>
+        <div class="card"><h3 style="color:#fbbf24">Infraestructura</h3><div class="li"><i class="bi bi-link-45deg"></i><div>Integración de múltiples fuentes</div></div><div class="li"><i class="bi bi-arrows-expand"></i><div>Escalabilidad de volumen</div></div></div>
+        <div class="card"><h3 style="color:#a78bfa">Análisis</h3><div class="li"><i class="bi bi-pie-chart"></i><div>BI: dashboards y reportes</div></div><div class="li"><i class="bi bi-cpu"></i><div>Analítica: modelos ML</div></div></div>
+        <div class="card"><h3 style="color:#f87171">Cultura</h3><div class="li"><i class="bi bi-book"></i><div>Alfabetización y formación</div></div><div class="li"><i class="bi bi-award"></i><div>Incentivos alineados</div></div></div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 14: Gobernanza de datos -->
-
-  <section class="slide slide-14" data-title="IV. Gobernanza de datos">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
+  <!-- SLIDE 14: Gobernanza de datos -->
+  <section class="slide" data-slide="14">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Gobernanza de datos</h2>
+      <div class="card">
+        <h3 style="color:#60a5fa"><i class="bi bi-shield-check"></i> Definición</h3>
+        <p style="font-size:20px">Conjunto de <b style="color:#60a5fa">políticas, roles, procesos y estándares</b> para asegurar datos <b style="color:#60a5fa">confiables, seguros y accesibles</b>.</p>
       </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Gobernanza de datos</h1>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="card"><i class="bi bi-check-circle"></i><h4 style="color:#60a5fa">Calidad</h4><p>Precisión, consistencia, actualidad</p></div>
+        <div class="card"><i class="bi bi-lock"></i><h4 style="color:#60a5fa">Seguridad</h4><p>Accesos, cifrado, fugas</p></div>
+        <div class="card"><i class="bi bi-file-earmark-text"></i><h4 style="color:#60a5fa">Compliance</h4><p>GDPR/CCPA y locales</p></div>
+        <div class="card"><i class="bi bi-diagram-3"></i><h4 style="color:#60a5fa">Metadatos & linaje</h4><p>Origen, transformaciones, uso</p></div>
+        <div class="card"><i class="bi bi-person-badge"></i><h4 style="color:#60a5fa">Stewardship</h4><p>Responsables por dominio</p></div>
       </div>
-      <div class="content">
-        <div class="definition-box">
-          <h3 class="definition-title"><i class="bi bi-shield-check"></i> Definición</h3>
-          <p class="definition-text">Conjunto de <span class="highlight">políticas, roles, procesos y estándares</span> que aseguran que los datos sean <span class="highlight">confiables, seguros y accesibles</span> para toda la organización.</p>
-        </div>
-        <div class="elements-grid">
-          <div class="element-card"><i class="bi bi-check-circle element-icon"></i><h3 class="element-title">Calidad</h3><p class="element-text">Precisión, completitud, consistencia y actualidad de los datos para garantizar su fiabilidad</p></div>
-          <div class="element-card"><i class="bi bi-lock element-icon"></i><h3 class="element-title">Seguridad</h3><p class="element-text">Control de accesos, cifrado y prevención de fugas para proteger la información sensible</p></div>
-          <div class="element-card"><i class="bi bi-file-earmark-text element-icon"></i><h3 class="element-title">Cumplimiento normativo</h3><p class="element-text">Adherencia a regulaciones como GDPR, CCPA y Ley de Protección de Datos Personales</p></div>
-          <div class="element-card"><i class="bi bi-diagram-3 element-icon"></i><h3 class="element-title">Metadatos y linaje</h3><p class="element-text">Saber de dónde vienen los datos, cómo se transformaron y dónde se utilizan en la organización</p></div>
-          <div class="element-card"><i class="bi bi-person-badge element-icon"></i><h3 class="element-title">Propiedad y stewardship</h3><p class="element-text">Definir responsables claros para cada dominio de datos y establecer roles de custodia</p></div>
-        </div>
-        <div class="impact-box">
-          <i class="bi bi-exclamation-triangle impact-icon"></i>
-          <div class="impact-content">
-            <h3 class="impact-title">Impacto crítico</h3>
-            <p class="impact-text">Sin gobernanza adecuada, se multiplica el riesgo de <span class="warning-highlight">"garbage in, garbage out"</span>, y las decisiones se apoyan en información poco fiable.</p>
-          </div>
-        </div>
+      <div class="card" style="margin-top:12px;background:rgba(248,113,113,.15)">
+        <h4 style="color:#f87171"><i class="bi bi-exclamation-triangle"></i> Impacto crítico</h4>
+        <p>Sin gobernanza, aparece el riesgo de <b style="color:#f87171">“garbage in, garbage out”</b> y decisiones poco fiables.</p>
       </div>
     </div>
   </section>
 
-  <!-- Slide 15: Infraestructura de datos -->
-
-  <section class="slide slide-15" data-title="IV. Infraestructura de datos">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
+  <!-- SLIDE 15: Infraestructura de datos -->
+  <section class="slide" data-slide="15">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Estrategia de datos e infraestructura</h2>
+      <h3 class="subtitle">Infraestructura de datos</h3>
+      <div class="card"><h4><i class="bi bi-hdd-network"></i> Objetivo</h4><p>Capacidades para <b style="color:#fbbf24">capturar, almacenar, procesar y distribuir</b> datos eficientemente.</p></div>
+      <div class="grid-3" style="margin-top:12px">
+        <div class="card"><h4 style="color:#fbbf24"><i class="bi bi-link-45deg"></i> Integración</h4><p>Unificar fuentes internas y externas</p></div>
+        <div class="card"><h4 style="color:#fbbf24"><i class="bi bi-arrows-expand"></i> Escalabilidad</h4><p>Volumen, variedad y velocidad</p></div>
+        <div class="card"><h4 style="color:#fbbf24"><i class="bi bi-gear"></i> Flexibilidad</h4><p>Adaptarse a nuevas analíticas</p></div>
       </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Estrategia de datos e infraestructura</h1>
-        <h2 class="subtitle">Infraestructura de datos</h2>
-      </div>
-      <div class="content">
-        <div class="intro-box">
-          <h3 class="intro-title"><i class="bi bi-hdd-network"></i> Objetivo</h3>
-          <p class="intro-text">Proporcionar las capacidades técnicas para <span class="highlight">capturar, almacenar, procesar y distribuir</span> datos de manera eficiente en toda la organización.</p>
-        </div>
-        <div class="key-aspects">
-          <div class="aspect-card"><i class="bi bi-link-45deg aspect-icon"></i><h3 class="aspect-title">Integración</h3><p class="aspect-text">Conectar múltiples fuentes de datos internas y externas para crear una visión unificada</p></div>
-          <div class="aspect-card"><i class="bi bi-arrows-expand aspect-icon"></i><h3 class="aspect-title">Escalabilidad</h3><p class="aspect-text">Soportar volúmenes crecientes y distintos formatos de datos (estructurados, semiestructurados, no estructurados)</p></div>
-          <div class="aspect-card"><i class="bi bi-gear aspect-icon"></i><h3 class="aspect-title">Flexibilidad</h3><p class="aspect-text">Adaptarse rápidamente a nuevas necesidades analíticas y requisitos del negocio</p></div>
-        </div>
-        <div class="architectures-container">
-          <h3 class="architectures-title"><i class="bi bi-diagram-3"></i> Arquitecturas típicas</h3>
-          <div class="architectures-grid">
-            <div class="arch-card"><i class="bi bi-building arch-icon dw-icon"></i><h3 class="arch-title dw-title">Data Warehouse</h3><p class="arch-description">Orientado a datos estructurados, optimizado para consultas analíticas históricas</p><div class="arch-features"><div class="feature-item"><i class="bi bi-check-circle"></i><span>Esquema predefinido</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Alta performance en consultas</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Calidad y consistencia</span></div></div></div>
-            <div class="arch-card"><i class="bi bi-water arch-icon dl-icon"></i><h3 class="arch-title dl-title">Data Lake</h3><p class="arch-description">Almacena datos en bruto de cualquier tipo y origen, a gran escala</p><div class="arch-features"><div class="feature-item"><i class="bi bi-check-circle"></i><span>Esquema flexible (schema-on-read)</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Ideal para ciencia de datos</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Bajo costo de almacenamiento</span></div></div></div>
-            <div class="arch-card"><i class="bi bi-layers arch-icon med-icon"></i><h3 class="arch-title med-title">Arquitectura Medallón</h3><p class="arch-description">Capas de refinamiento (bronze, silver, gold) para distintos usos</p><div class="arch-features"><div class="feature-item"><i class="bi bi-check-circle"></i><span>Bronce: datos crudos</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Silver: datos limpios</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Gold: datos para negocio</span></div></div></div>
-            <div class="arch-card"><i class="bi bi-diagram-2 arch-icon lh-icon"></i><h3 class="arch-title lh-title">Data Lakehouse</h3><p class="arch-description">Combina gobernanza del DW con flexibilidad del Data Lake</p><div class="arch-features"><div class="feature-item"><i class="bi bi-check-circle"></i><span>Mejor de ambos mundos</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Transacciones ACID</span></div><div class="feature-item"><i class="bi bi-check-circle"></i><span>Esquema flexible y gobernanza</span></div></div></div>
-          </div>
-        </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card"><h4 style="color:#60a5fa"><i class="bi bi-building"></i> Data Warehouse</h4><p>Histórico, esquema predefinido</p></div>
+        <div class="card"><h4 style="color:#a78bfa"><i class="bi bi-water"></i> Data Lake</h4><p>Datos en bruto, schema-on-read</p></div>
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-layers"></i> Medallón</h4><p>Bronze/Silver/Gold</p></div>
+        <div class="card"><h4 style="color:#4ade80"><i class="bi bi-diagram-2"></i> Lakehouse</h4><p>Flexibilidad + gobernanza</p></div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 16: Evolución de la infraestructura -->
-
-  <section class="slide slide-16" data-title="IV. Evolución de la infraestructura">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
-      </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Evolución de la infraestructura: de silos a inteligencia artificial</h1>
-      </div>
-      <div class="content">
-        <div class="evolution-container">
-          <h2 class="evolution-title">Etapas en la madurez de la gestión de datos</h2>
-          <div class="evolution-timeline">
-            <div class="stage"><div class="stage-number">1</div><i class="bi bi-building stage-icon"></i><h3 class="stage-title">Silos de datos</h3><div class="stage-description">Cada área guarda sus datos sin integración<p class="stage-problem">Problemas: <span class="highlight">duplicidad</span>, inconsistencias, visiones fragmentadas</p></div></div>
-            <div class="stage"><div class="stage-number">2</div><i class="bi bi-archive stage-icon"></i><h3 class="stage-title">Data Warehouse</h3><div class="stage-description">Integración de datos estructurados en repositorio central<p class="stage-problem">Optimizado para reportes históricos pero <span class="highlight">limitado en flexibilidad</span></p></div></div>
-            <div class="stage"><div class="stage-number">3</div><i class="bi bi-water stage-icon"></i><h3 class="stage-title">Data Lake</h3><div class="stage-description">Almacena datos en bruto de cualquier tipo y origen<p class="stage-problem">Riesgo de convertir en <span class="highlight">"data swamp"</span> sin gobernanza</p></div></div>
-            <div class="stage"><div class="stage-number">4</div><i class="bi bi-layers stage-icon"></i><h3 class="stage-title">Medallión & Lakehouse</h3><div class="stage-description">Capas de refinamiento (bronze, silver, gold) dentro del Data Lake<p class="stage-problem">Combina <span class="highlight">flexibilidad con gobernanza</span></p></div></div>
-            <div class="stage"><div class="stage-number">5</div><i class="bi bi-cpu stage-icon"></i><h3 class="stage-title">IA Integrada</h3><div class="stage-description">Datos refinados alimentan modelos predictivos y prescriptivos<p class="stage-problem">Permite <span class="highlight">automatización de decisiones</span> complejas</p></div></div>
-          </div>
-        </div>
+  <!-- SLIDE 16: Evolución de la infraestructura -->
+  <section class="slide" data-slide="16">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Evolución de la infraestructura</h2>
+      <div class="grid-3" style="grid-template-columns:repeat(5,1fr);gap:12px">
+        <div class="card" style="text-align:center"><div class="name" style="color:#60a5fa">1. Silos</div><p style="margin:6px 0">Duplicidad e inconsistencias</p></div>
+        <div class="card" style="text-align:center"><div class="name" style="color:#a78bfa">2. DW</div><p style="margin:6px 0">Histórico, menos flexible</p></div>
+        <div class="card" style="text-align:center"><div class="name" style="color:#fbbf24">3. Data Lake</div><p style="margin:6px 0">Riesgo "swamp" sin gobierno</p></div>
+        <div class="card" style="text-align:center"><div class="name" style="color:#4ade80">4. Medallón/Lakehouse</div><p style="margin:6px 0">Flex + gobierno</p></div>
+        <div class="card" style="text-align:center"><div class="name" style="color:#f87171">5. IA integrada</div><p style="margin:6px 0">Automatiza decisiones</p></div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 17: Análisis y ciencia de datos -->
-
-  <section class="slide slide-17" data-title="IV. Análisis y ciencia de datos">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
+  <!-- SLIDE 17: Análisis y ciencia de datos -->
+  <section class="slide" data-slide="17">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Análisis y ciencia de datos</h2>
+      <div class="grid-2">
+        <div class="card"><h4 style="color:#a78bfa"><i class="bi bi-bar-chart-line"></i> BI</h4><p>Dashboards, KPIs, reportes</p></div>
+        <div class="card"><h4 style="color:#fbbf24"><i class="bi bi-cpu"></i> Analítica avanzada</h4><p>Predicciones, segmentación, optimización</p></div>
+        <div class="card"><h4 style="color:#60a5fa"><i class="bi bi-search"></i> Ciencia de datos</h4><p>Exploración, modelado, experimentación</p></div>
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-arrow-repeat"></i> Enlace con operación</h4><p>Automatización y resultados</p></div>
       </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Estrategia de datos e infraestructura</h1>
-        <h2 class="subtitle">Análisis y ciencia de datos</h2>
-      </div>
-      <div class="content">
-        <div class="analysis-grid">
-          <div class="analysis-card"><div class="card-header"><i class="bi bi-bar-chart-line card-icon bi-icon"></i><h3 class="card-title bi-title">Análisis de negocio (BI)</h3></div><p class="card-description">Transforma datos en informes y dashboards para monitorear desempeño</p><div class="examples"><div class="example-tag bi-tag"><i class="bi bi-graph-up"></i> KPIs</div><div class="example-tag bi-tag"><i class="bi bi-table"></i> Reportes</div><div class="example-tag bi-tag"><i class="bi bi-speedometer2"></i> Dashboards</div></div></div>
-          <div class="analysis-card"><div class="card-header"><i class="bi bi-cpu card-icon advanced-icon"></i><h3 class="card-title advanced-title">Analítica avanzada</h3></div><p class="card-description">Modelos estadísticos y machine learning para predicciones y optimización</p><div class="examples"><div class="example-tag advanced-tag"><i class="bi bi-graph-up-arrow"></i> Predicciones</div><div class="example-tag advanced-tag"><i class="bi bi-people"></i> Segmentación</div><div class="example-tag advanced-tag"><i class="bi bi-gear"></i> Optimización</div></div></div>
-          <div class="analysis-card"><div class="card-header"><i class="bi bi-search card-icon science-icon"></i><h3 class="card-title science-title">Ciencia de datos</h3></div><p class="card-description">Generación de insights mediante técnicas exploratorias y modelado complejo</p><div class="examples"><div class="example-tag science-tag"><i class="bi bi-bezier2"></i> Exploración</div><div class="example-tag science-tag"><i class="bi bi-diagram-3"></i> Modelado</div><div class="example-tag science-tag"><i class="bi bi-flask"></i> Experimentación</div></div></div>
-          <div class="analysis-card"><div class="card-header"><i class="bi bi-arrow-repeat card-icon operation-icon"></i><h3 class="card-title operation-title">Enlace con la operación</h3></div><p class="card-description">El análisis se traduce en acciones medibles y mejoras operativas</p><div class="examples"><div class="example-tag operation-tag"><i class="bi bi-check-circle"></i> Automatización</div><div class="example-tag operation-tag"><i class="bi bi-lightning"></i> Optimización</div><div class="example-tag operation-tag"><i class="bi bi-trophy"></i> Resultados</div></div></div>
-        </div>
-        <div class="value-box"><i class="bi bi-lightbulb value-icon"></i><div class="value-content"><h3 class="value-title">El valor real del análisis</h3><p class="value-text">Integración efectiva de estas áreas permite transformar <span class="highlight">datos brutos en decisiones inteligentes</span> con impacto medible</p></div></div>
+      <div class="card" style="margin-top:12px;background:rgba(74,222,128,.15)">
+        <h4 style="color:#4ade80"><i class="bi bi-lightbulb"></i> Valor</h4>
+        <p>Integrar estas áreas permite pasar de <b style="color:#4ade80">datos brutos</b> a <b style="color:#4ade80">decisiones inteligentes</b>.</p>
       </div>
     </div>
   </section>
 
-  <!-- Slide 18: Cultura Organizacional orientada a datos -->
-
-  <section class="slide slide-18" data-title="IV. Cultura organizacional orientada a datos">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
+  <!-- SLIDE 18: Cultura organizacional -->
+  <section class="slide" data-slide="18">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Cultura organizacional orientada a datos</h2>
+      <div class="grid-2">
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-book"></i> Alfabetización</h4><p>Formación para todos los niveles</p></div>
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-award"></i> Incentivos</h4><p>Recompensar uso de datos</p></div>
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-person-badge"></i> Liderazgo</h4><p>Ejemplo desde la dirección</p></div>
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-flask"></i> Experimentación</h4><p>Ambiente para innovar y aprender</p></div>
       </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Estrategia de datos e infraestructura</h1>
-        <h2 class="subtitle">Cultura organizacional orientada a datos</h2>
-      </div>
-      <div class="content">
-        <div class="definition-box"><h3 class="definition-title"><i class="bi bi-people"></i> Definición</h3><p class="definition-text">Mentalidad compartida donde <span class="highlight">todos los miembros</span> de la organización valoran y utilizan los datos para guiar sus decisiones</p></div>
-        <div class="keys-grid">
-          <div class="key-card"><div class="key-header"><i class="bi bi-book key-icon"></i><h3 class="key-title">Alfabetización en datos</h3></div><p class="key-text">Capacitación continua para que todos los niveles comprendan y utilicen datos efectivamente</p></div>
-          <div class="key-card"><div class="key-header"><i class="bi bi-award key-icon"></i><h3 class="key-title">Incentivos alineados</h3></div><p class="key-text">Sistema de recompensas que valore y promueva el uso de datos en la toma de decisiones</p></div>
-          <div class="key-card"><div class="key-header"><i class="bi bi-person-badge key-icon"></i><h3 class="key-title">Liderazgo ejemplar</h3></div><p class="key-text">Directivos que predican con el ejemplo y demuestran el valor de las decisiones basadas en datos</p></div>
-          <div class="key-card"><div class="key-header"><i class="bi bi-flask key-icon"></i><h3 class="key-title">Espacio para experimentar</h3></div><p class="key-text">Ambiente que fomenta la innovación y permite aprender de los errores en el uso de datos</p></div>
-        </div>
-        <div class="obstacle-box"><i class="bi bi-exclamation-triangle obstacle-icon"></i><div class="obstacle-content"><h3 class="obstacle-title">Obstáculo frecuente</h3><p class="obstacle-text">Tener la <span class="warning-highlight">tecnología</span> pero no el <span class="warning-highlight">cambio cultural</span> que la acompañe. La transformación data-driven va más allá de las herramientas.</p></div></div>
+      <div class="card" style="margin-top:12px;background:rgba(248,113,113,.15)">
+        <p><b style="color:#f87171">Obstáculo:</b> Tener tecnología sin el cambio cultural que la acompañe.</p>
       </div>
     </div>
   </section>
 
-  <!-- Slide 19: Factores críticos para implementar -->
-
-  <section class="slide slide-19" data-title="IV. Factores críticos para implementar">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
-      </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Factores críticos para implementar una estrategia de datos</h1>
-      </div>
-      <div class="content">
-        <div class="factors-grid">
-          <div class="factor-card"><div class="card-header"><i class="bi bi-bullseye card-icon"></i><h3 class="card-title">Alineación con objetivos</h3></div><p class="card-description">La infraestructura no es un fin en sí misma; debe responder a <span class="highlight">problemas concretos de negocio</span> y generar valor medible.</p></div>
-          <div class="factor-card"><div class="card-header"><i class="bi bi-arrows-expand card-icon"></i><h3 class="card-title">Escalabilidad</h3></div><p class="card-description">Anticipar crecimiento en <span class="highlight">volumen, variedad y velocidad</span> de datos para evitar obsolescencia prematura.</p></div>
-          <div class="factor-card"><div class="card-header"><i class="bi bi-shield-lock card-icon"></i><h3 class="card-title">Seguridad y compliance</h3></div><p class="card-description">Protección y trazabilidad como parte integral, no añadida a posteriori. Cumplimiento de normativas.</p></div>
-          <div class="factor-card"><div class="card-header"><i class="bi bi-unlock card-icon"></i><h3 class="card-title">Democratización del acceso</h3></div><p class="card-description">Facilitar que distintos perfiles puedan <span class="highlight">consultar, analizar y explotar datos</span> según su rol.</p></div>
-          <div class="factor-card"><div class="card-header"><i class="bi bi-gear card-icon"></i><h3 class="card-title">Automatización</h3></div><p class="card-description">Reducir dependencia de procesos manuales en ingesta, limpieza y distribución para mejorar eficiencia.</p></div>
-          <div class="factor-card"><div class="card-header"><i class="bi bi-graph-up card-icon"></i><h3 class="card-title">Medición del valor</h3></div><p class="card-description">Establecer KPIs que midan el impacto: tiempo de respuesta, reducción de errores, <span class="highlight">aumento de ventas</span>.</p></div>
-        </div>
+  <!-- SLIDE 19: Factores críticos -->
+  <section class="slide" data-slide="19">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Factores críticos para implementar</h2>
+      <div class="grid-3">
+        <div class="card"><h4 style="color:#60a5fa"><i class="bi bi-bullseye"></i> Alineación</h4><p>Con objetivos de negocio</p></div>
+        <div class="card"><h4 style="color:#a78bfa"><i class="bi bi-arrows-expand"></i> Escalabilidad</h4><p>Crecimiento en datos</p></div>
+        <div class="card"><h4 style="color:#fbbf24"><i class="bi bi-shield-lock"></i> Seguridad</h4><p>Trazabilidad y normas</p></div>
+        <div class="card"><h4 style="color:#4ade80"><i class="bi bi-unlock"></i> Democratización</h4><p>Acceso según rol</p></div>
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-gear"></i> Automatización</h4><p>Menos procesos manuales</p></div>
+        <div class="card"><h4 style="color:#a5b4fc"><i class="bi bi-graph-up"></i> Medición</h4><p>KPI de impacto</p></div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 20: Riesgos y errores comunes -->
-
-  <section class="slide slide-20" data-title="IV. Riesgos y errores comunes">
-    <div class="slide">
-      <div class="data-elements">
-        <div class="data-circle circle-1"></div>
-        <div class="data-circle circle-2"></div>
-        <div class="data-dot dot-1"></div>
-        <div class="data-dot dot-2"></div>
-        <div class="data-dot dot-3"></div>
-        <div class="data-dot dot-4"></div>
-        <div class="data-dot dot-5"></div>
-        <div class="data-dot dot-6"></div>
-      </div>
-      <div class="header">
-        <h1 class="title"><span class="title-number">IV</span> Riesgos y errores comunes</h1>
-      </div>
-      <div class="content">
-        <div class="risks-grid">
-          <div class="risk-card"><div class="risk-header"><i class="bi bi-cpu risk-icon"></i><h3 class="risk-title">Foco exclusivo en tecnología</h3></div><p class="risk-description">Invertir en plataformas avanzadas sin implementar el <span class="highlight">cambio cultural</span> necesario para aprovecharlas realmente.</p><p class="risk-impact">Conduce a infraestructuras subutilizadas y bajo retorno de inversión</p></div>
-          <div class="risk-card"><div class="risk-header"><i class="bi bi-water risk-icon"></i><h3 class="risk-title">Data lakes sin gobernanza</h3></div><p class="risk-description">Acumular datos en bruto sin establecer <span class="highlight">estándares de calidad</span> o procesos de organización adecuados.</p><p class="risk-impact">Convierte el lago en un "pantano de datos" (data swamp) inutilizable</p></div>
-          <div class="risk-card"><div class="risk-header"><i class="bi bi-box-seam risk-icon"></i><h3 class="risk-title">Proyectos aislados</h3></div><p class="risk-description">Implementar soluciones sin pensar en la <span class="highlight">escalabilidad</span> o la integración con otros sistemas y procesos.</p><p class="risk-impact">Crea silos de información y duplicación de esfuerzos</p></div>
-          <div class="risk-card"><div class="risk-header"><i class="bi bi-person-badge risk-icon"></i><h3 class="risk-title">Falta de sponsorship ejecutivo</h3></div><p class="risk-description">Sin apoyo de la <span class="highlight">alta dirección</span>, las iniciativas pierden prioridad y recursos frente a otros proyectos.</p><p class="risk-impact">Las estrategias de datos se estancan y nunca alcanzan su potencial</p></div>
-        </div>
+  <!-- SLIDE 20: Riesgos y errores comunes -->
+  <section class="slide" data-slide="20">
+    <div class="data-elements"></div>
+    <div class="content" style="align-items:stretch;text-align:left;padding:40px 60px">
+      <h2 class="title" style="font-size:44px"><span style="color:var(--accent);font-weight:800;margin-right:10px">IV</span> Riesgos y errores comunes</h2>
+      <div class="grid-2">
+        <div class="card"><h4 style="color:#f87171"><i class="bi bi-cpu"></i> Solo tecnología</h4><p>Sin cambio cultural → bajo ROI</p></div>
+        <div class="card"><h4 style="color:#60a5fa"><i class="bi bi-water"></i> Data lakes sin gobierno</h4><p>Terminan en "data swamp"</p></div>
+        <div class="card"><h4 style="color:#a78bfa"><i class="bi bi-box-seam"></i> Proyectos aislados</h4><p>Silos y duplicación</p></div>
+        <div class="card"><h4 style="color:#fbbf24"><i class="bi bi-person-badge"></i> Sin sponsorship</h4><p>Baja prioridad y recursos</p></div>
       </div>
     </div>
   </section>
+
+</main>
+```
+
+  </div>
 
   <script>
-    // Re-initialize after all slides (incl. the appended 12–20) are parsed
-    (function(){
-      const slidesAll = Array.from(document.querySelectorAll('section.slide'));
-      let idx = 0;
-      function show(i){
-        idx = (i + slidesAll.length) % slidesAll.length;
-        slidesAll.forEach((s,j)=>{ s.style.display = j===idx ? 'flex' : 'none'; });
-        const p = document.getElementById('progress'); if(p){ p.style.width = ((idx+1)/slidesAll.length*100)+'%'; }
-      }
-      const prev = document.getElementById('prev');
-      const next = document.getElementById('next');
-      const pdf  = document.getElementById('pdf');
-      if(prev) prev.onclick = ()=>show(idx-1);
-      if(next) next.onclick = ()=>show(idx+1);
-      if(pdf)  pdf.onclick  = ()=>window.print();
-      document.addEventListener('keydown',e=>{
-        if(e.key==='ArrowRight' || e.key===' ') show(idx+1);
-        if(e.key==='ArrowLeft') show(idx-1);
-        if(e.key.toLowerCase()==='p') window.print();
-      });
-      show(0);
-    })();
+    // Simple deck controller (igual al original)
+    const slides=[...document.querySelectorAll('section.slide')];
+    let idx=0;
+    function show(i){
+      idx=(i+slides.length)%slides.length;
+      slides.forEach((s,j)=>{s.style.display=j===idx?'block':'none'});
+    }
+    function next(){show(idx+1)}
+    function prev(){show(idx-1)}
+    document.getElementById('next').onclick=next;
+    document.getElementById('prev').onclick=prev;
+    document.getElementById('fs').onclick=()=>{const el=document.documentElement; if(!document.fullscreenElement){el.requestFullscreen?.()} else {document.exitFullscreen?.()}}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next(); if(e.key==='ArrowLeft')prev();});
+    // init
+    show(0);
   </script>
 
+</body>
 </html>
 
